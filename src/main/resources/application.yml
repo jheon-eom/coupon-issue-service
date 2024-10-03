@@ -19,3 +19,7 @@ spring:
       ddl-auto: create-drop
     show-sql: true
     database-platform: org.hibernate.dialect.H2Dialect
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
