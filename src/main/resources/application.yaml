@@ -1,0 +1,93 @@
+server:
+  tomcat:
+    threads:
+      # Tomcat default max threads: 200
+      max: ${SERVER_TOMCAT_THREADS_MAX:400}
+      # Tomcat default min spare threads: 10
+      min-spare: ${SERVER_TOMCAT_THREADS_MIN_SPARE:50}
+    # Tomcat default accept count: 100
+    accept-count: ${SERVER_TOMCAT_ACCEPT_COUNT:2000}
+    # Tomcat default max connections (NIO): 8192
+    max-connections: ${SERVER_TOMCAT_MAX_CONNECTIONS:20000}
+
+spring:
+  application:
+    name: coupon-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/coupon_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:coupon_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:coupon_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        show_sql: true
+    open-in-view: false
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
+
+coupon:
+  v4:
+    kafka:
+      topic: ${COUPON_V4_KAFKA_TOPIC:coupon.issue.v4}
+      failed-topic: ${COUPON_V4_KAFKA_FAILED_TOPIC:coupon.issue.failed.v4}
+      group-id: ${COUPON_V4_KAFKA_GROUP_ID:coupon-issue-v4-worker}
+    worker:
+      fixed-delay-ms: ${COUPON_V4_WORKER_FIXED_DELAY_MS:200}
+      poll-timeout-ms: ${COUPON_V4_WORKER_POLL_TIMEOUT_MS:1000}
+      batch-size: ${COUPON_V4_WORKER_BATCH_SIZE:100}
+      db-max-retries: ${COUPON_V4_WORKER_DB_MAX_RETRIES:3}
+      retry-backoff-ms: ${COUPON_V4_WORKER_RETRY_BACKOFF_MS:100}
+    producer:
+      send-timeout-ms: ${COUPON_V4_PRODUCER_SEND_TIMEOUT_MS:5000}
+
+  v5:
+    kafka:
+      issue-topic: ${COUPON_V5_KAFKA_ISSUE_TOPIC:coupon.issue.v5}
+      failed-topic: ${COUPON_V5_KAFKA_FAILED_TOPIC:coupon.issue.failed.v5}
+      group-id: ${COUPON_V5_KAFKA_GROUP_ID:coupon-issue-v5-worker}
+    redis:
+      pending-key: ${COUPON_V5_REDIS_PENDING_KEY:coupon:v5:pending}
+      processing-key: ${COUPON_V5_REDIS_PROCESSING_KEY:coupon:v5:processing}
+      retry-key: ${COUPON_V5_REDIS_RETRY_KEY:coupon:v5:retry}
+      relay-failed-key: ${COUPON_V5_REDIS_RELAY_FAILED_KEY:coupon:v5:relay:failed}
+    relay:
+      fixed-delay-ms: ${COUPON_V5_RELAY_FIXED_DELAY_MS:100}
+      batch-size: ${COUPON_V5_RELAY_BATCH_SIZE:200}
+      retry-backoff-ms: ${COUPON_V5_RELAY_RETRY_BACKOFF_MS:200}
+      max-retries: ${COUPON_V5_RELAY_MAX_RETRIES:0}
+      recover-processing-batch-size: ${COUPON_V5_RELAY_RECOVER_BATCH_SIZE:200}
+    worker:
+      fixed-delay-ms: ${COUPON_V5_WORKER_FIXED_DELAY_MS:200}
+      poll-timeout-ms: ${COUPON_V5_WORKER_POLL_TIMEOUT_MS:1000}
+      batch-size: ${COUPON_V5_WORKER_BATCH_SIZE:100}
+      db-max-retries: ${COUPON_V5_WORKER_DB_MAX_RETRIES:3}
+      retry-backoff-ms: ${COUPON_V5_WORKER_RETRY_BACKOFF_MS:100}
+    producer:
+      send-timeout-ms: ${COUPON_V5_PRODUCER_SEND_TIMEOUT_MS:5000}

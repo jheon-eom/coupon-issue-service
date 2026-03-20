@@ -1,0 +1,38 @@
+** 선착순 쿠폰 발급 시나리오 **
+- 동시성 고려하지 않음
+- HTTP -> Controller -> Service -> Repository -> DB
+
+** test script **
+export const options = {
+  scenarios: {
+    issue_coupon_open_burst: {
+      executor: 'ramping-arrival-rate',
+      startRate: 10000,
+      timeUnit: '1s',
+      preAllocatedVUs: 10000,
+      maxVUs: 30000,
+      stages: [
+        { target: 10000, duration: '5s' }, // 오픈 직후 폭증
+        { target: 7000, duration: '5s' },  // 감소 시작
+        { target: 3000, duration: '5s' },  // 빠른 감소
+        { target: 500, duration: '5s' },   // 잔여 트래픽
+        { target: 0, duration: '3s' },     // 종료
+      ],
+    },
+  },
+};
+
+** 결과 **
+- 요청 성공률 14.98%, 실패 85.01%
+- 평균 응답시간 9.28s
+- 성공 실패 비율 (4990 / 33301)
+- 쿠폰 제한은 500개인데, 총 4990개가 발행
+
+** 분석 **
+- 동시성 문제로 인해 쿠폰이 500개 이상 발행됨
+- CPU 사용 수준은 0.79%로 CPU가 병목이 아님
+- Memory 사용량은 759.7MB/7.65GB로 메모리도 병목이 아님
+- Disk read/write: 7.86MB / 541KB로 디스크 I/O도 병목이 아님
+- Network I/O: 46.4MB / 34.2MB로 네트워크도 병목이 아님
+- K6 결과와 종합해 보면 DB 커넥션풀 고갈이 원인
+- 요청은 많이 들어오는데 DB 커넥션이 부족해서 타임아웃 또는 서버 에러 발생

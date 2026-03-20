@@ -1,0 +1,31 @@
+@host = http://localhost:8080
+
+### v3 쿠폰 생성
+POST {{host}}/api/v3/coupons
+Content-Type: application/json
+Accept: application/json
+
+### v3 쿠폰 발급
+POST {{host}}/api/v3/coupons/issue
+Content-Type: application/json
+Accept: application/json
+
+### v4 쿠폰 생성
+POST {{host}}/api/v4/coupons
+Content-Type: application/json
+Accept: application/json
+
+### v4 쿠폰 발급
+POST {{host}}/api/v4/coupons/issue
+Content-Type: application/json
+Accept: application/json
+
+### v5 쿠폰 생성
+POST {{host}}/api/v5/coupons
+Content-Type: application/json
+Accept: application/json
+
+### v5 쿠폰 발급
+POST {{host}}/api/v5/coupons/issue
+Content-Type: application/json
+Accept: application/json
